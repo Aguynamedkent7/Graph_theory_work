@@ -4,25 +4,21 @@
 
 Group project: implement the Havel-Hakimi algorithm in Python using `networkx` and `matplotlib`.
 
-The task: decide if each degree sequence is **graphical**, and if so, construct the graph, verify degrees, and render a matplotlib plot. If not graphical, print a clear explanation of why.
+Activity 1 Part 2 covers scenario 2: decide if the degree sequence is **graphical**, and if so, construct the graph, verify degrees, and render a matplotlib plot. If not graphical, print a clear explanation of why.
 
-## Scenarios
+## Scenario
 
 | # | Scenario | Degree Sequence | Graphical? | Status |
 |---|----------|-----------------|------------|--------|
-| 1 | Local tech company (6 servers) | S1 = (5, 4, 3, 2, 1, 1) | No | OPEN |
 | 2 | Environmental sensor nodes (6) | S2 = (5, 4, 3, 2, 1, 0) | No | DONE |
-| 3 | Data center switches (7) | S3 = (4, 3, 2, 2, 1, 0) | Yes | OPEN |
-| 4 | Hex-grid map (6 territories) | S4 = (6, 3, 3, 2, 1, 1) | No | OPEN |
-| 5 | Social network (6 members) | S5 = (5, 4, 3, 2, 1, 3) | Yes | OPEN |
 
-> Note: the assignment only requires scenario 2, but we implement the shared library so any scenario can be run. Graphical status was verified with `networkx.is_graphical`.
+> Graphical status was verified with `networkx.is_graphical`.
 
 ## How to run
 
 ```bash
 python -m pip install -r requirements.txt
-python havel_hakimi.py          # runs scenario 2 by default
+python havel_hakimi.py          # runs scenario 2
 ```
 
 ## Code structure
@@ -45,5 +41,5 @@ python havel_hakimi.py          # runs scenario 2 by default
 
 ## GitHub issues workflow
 
-- Each OPEN scenario has a GitHub issue. Use the issue for discussion.
+- Use the GitHub issue for discussion.
 - Consult `havel_hakimi.py` before raising "new" bugs — it's meant to be shared.
