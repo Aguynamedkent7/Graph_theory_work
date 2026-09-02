@@ -6,8 +6,14 @@ import matplotlib.pyplot as plt
 import networkx as nx
 
 
+# ── Helpers ──────────────────────────────────────────────────────────────────
+
+
 def describe(seq, labels):
     return ", ".join(f"{label}:{deg}" for label, deg in zip(labels, seq))
+
+
+# ── Havel-Hakimi reduction ──────────────────────────────────────────────────
 
 
 def havel_hakimi(sequence, labels=None, verbose=True):
@@ -15,6 +21,7 @@ def havel_hakimi(sequence, labels=None, verbose=True):
     if labels is None:
         labels = [f"V{i+1}" for i in range(len(seq))]
 
+    # Handshaking Lemma: sum must be even
     total = sum(seq)
     if verbose:
         print(f"Sequence: {describe(seq, labels)}")
@@ -30,6 +37,7 @@ def havel_hakimi(sequence, labels=None, verbose=True):
 
     seq = sorted(seq, reverse=True)
     step = 0
+    # Main reduction loop
     while seq:
         step += 1
         if verbose:
@@ -72,6 +80,9 @@ def havel_hakimi(sequence, labels=None, verbose=True):
     return True, step
 
 
+# ── Pre-validation ───────────────────────────────────────────────────────────
+
+
 def check_sequence(sequence, labels=None, verbose=True):
     errors = []
     total = sum(sequence)
@@ -96,11 +107,17 @@ def check_sequence(sequence, labels=None, verbose=True):
     return True, []
 
 
+# ── Public API ───────────────────────────────────────────────────────────────
+
+
 def is_graphical(sequence, labels=None, verbose=True):
     ok, errors = check_sequence(sequence, labels, verbose=verbose)
     if errors:
         return False
     return havel_hakimi(sequence, labels, verbose=verbose)[0]
+
+
+# ── Graph construction & verification ────────────────────────────────────────
 
 
 def build_graph(sequence, labels=None, verbose=True):
@@ -156,6 +173,9 @@ def verify_degrees(G, expected, labels):
     return True
 
 
+# ── Plotting ─────────────────────────────────────────────────────────────────
+
+
 def plot_graph(G, labels, title="Constructed Network", out_path=None):
     pos = nx.circular_layout(G)
     nx.draw_networkx(
@@ -177,6 +197,9 @@ def plot_graph(G, labels, title="Constructed Network", out_path=None):
     else:
         plt.show()
     plt.close()
+
+
+# ── Scenario runner ──────────────────────────────────────────────────────────
 
 
 def main():
