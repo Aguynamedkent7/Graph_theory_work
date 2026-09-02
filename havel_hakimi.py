@@ -38,7 +38,6 @@ def havel_hakimi(sequence, labels=None, verbose=True):
             print("\nPre-check violations:")
             for v in violations:
                 print(f"  - {v}")
-            print(f"\nConclusion: Sequence is NOT graphical.")
         return False, 0
 
     # Reduction loop
