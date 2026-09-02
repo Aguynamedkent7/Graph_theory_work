@@ -1,5 +1,7 @@
 import sys
 
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import networkx as nx
 
@@ -154,7 +156,7 @@ def verify_degrees(G, expected, labels):
     return True
 
 
-def plot_graph(G, labels, title="Constructed Network"):
+def plot_graph(G, labels, title="Constructed Network", out_path=None):
     pos = nx.circular_layout(G)
     nx.draw_networkx(
         G,
@@ -169,12 +171,19 @@ def plot_graph(G, labels, title="Constructed Network"):
     plt.title(title)
     plt.axis("off")
     plt.tight_layout()
-    plt.show()
+    if out_path:
+        plt.savefig(out_path, dpi=150, bbox_inches="tight")
+        print(f"Figure saved to {out_path}")
+    else:
+        plt.show()
+    plt.close()
 
 
 def main():
+    import os
     sequence = [5, 4, 3, 2, 1, 0]
     labels = [f"V{i+1}" for i in range(len(sequence))]
+    out_path = os.environ.get("HH_OUT_PATH")
 
     print("=" * 60)
     print("CS 414-4B ACTIVITY 1 (Part 2): Havel-Hakimi Algorithm")
@@ -186,6 +195,15 @@ def main():
     print(f"\nHavel-Hakimi outcome: {'Graphical' if result else 'NOT graphical'}")
     if not result:
         print(f"Sequence {sequence} cannot be realized as a simple graph.")
+        if out_path:
+            msg = (
+                f"Scenario 2: S2 = {sequence}\n"
+                f"Sum of degrees = {sum(sequence)} (odd)\n"
+                f"Havel-Hakimi result: NOT graphical\n"
+            )
+            with open(out_path, "w") as f:
+                f.write(msg)
+            print(f"Non-graphical message saved to {out_path}")
     else:
         print(f"Sequence {sequence} is graphical (verified at step {step}).")
         print("\n--- Constructing graph ---")
@@ -195,7 +213,7 @@ def main():
         print(f"\nEdge list: {sorted(G.edges())}")
         print("\nDegree verification:")
         if verify_degrees(G, sequence, labels):
-            plot_graph(G, labels, title="Scenario 2: Sensor Network (S2)")
+            plot_graph(G, labels, title="Scenario 2: Sensor Network (S2)", out_path=out_path)
 
 
 if __name__ == "__main__":
