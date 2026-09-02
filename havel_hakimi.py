@@ -2,33 +2,43 @@ import os
 import sys
 
 import matplotlib
-matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import networkx as nx
 
 
 def havel_hakimi(sequence, labels=None, verbose=True):
+    """Run Havel-Hakimi reduction. Returns (is_graphical, step_count)."""
     seq = list(sequence)
     if labels is None:
         labels = [f"V{i+1}" for i in range(len(seq))]
 
     total = sum(seq)
+    n = len(seq)
     if verbose:
         print(f"Sequence: {', '.join(f'{l}:{d}' for l, d in zip(labels, seq))}")
         print(f"Sum of degrees = {total}")
+        print(f"Number of vertices = {n}")
 
-    # Pre-checks: Handshaking Lemma, non-negative, degree < n
+    # Pre-checks: collect all violations
+    violations = []
+
     if total % 2 != 0:
-        if verbose:
-            print(f">>> FAIL: sum = {total} (odd). Handshaking Lemma violated.")
-        return False, 0
+        violations.append(f"Sum = {total} is odd — Handshaking Lemma violated (sum of degrees must be even).")
+
     if any(d < 0 for d in seq):
+        neg = [labels[i] for i, d in enumerate(seq) if d < 0]
+        violations.append(f"Negative degree(s) found: {', '.join(f'{l}={seq[labels.index(l)]}' for l in neg)}.")
+
+    if any(d >= n for d in seq):
+        over = [labels[i] for i, d in enumerate(seq) if d >= n]
+        violations.append(f"Degree(s) exceed or equal n-1 ({n-1}): {', '.join(f'{l}={d}' for l, d in zip(labels, seq) if d >= n)}.")
+
+    if violations:
         if verbose:
-            print(">>> FAIL: negative degree value.")
-        return False, 0
-    if any(d >= len(seq) for d in seq):
-        if verbose:
-            print(f">>> FAIL: degree >= {len(seq)} (number of vertices).")
+            print("\nPre-check violations:")
+            for v in violations:
+                print(f"  - {v}")
+            print(f"\nConclusion: Sequence is NOT graphical.")
         return False, 0
 
     # Reduction loop
@@ -93,6 +103,8 @@ def verify_degrees(G, expected, labels):
 
 
 def plot_graph(G, labels, title="Constructed Network", out_path=None):
+    if out_path:
+        plt.switch_backend("Agg")
     nx.draw_networkx(G, nx.circular_layout(G), labels={v: v for v in labels},
                      node_color="lightblue", node_size=800, font_size=12,
                      font_weight="bold", with_labels=True)
@@ -107,30 +119,40 @@ def plot_graph(G, labels, title="Constructed Network", out_path=None):
     plt.close()
 
 
+def parse_sequence(raw):
+    raw = raw.strip()
+    parts = raw.replace(",", " ").split()
+    return [int(p) for p in parts]
+
+
 def main():
-    sequence = [5, 4, 3, 2, 1, 0]
-    labels = [f"V{i+1}" for i in range(len(sequence))]
     out_path = os.environ.get("HH_OUT_PATH")
 
     print("=" * 60)
     print("CS 414-4B ACTIVITY 1 (Part 2): Havel-Hakimi Algorithm")
-    print("Scenario 2: Environmental sensor nodes")
-    print(f"Target degree sequence S2 = {sequence}")
     print("=" * 60)
 
-    result, step = havel_hakimi(sequence, labels)
-    print(f"\nOutcome: {'Graphical' if result else 'NOT graphical'}")
+    while True:
+        raw = input("\nEnter degree sequence (comma or space separated, or 'exit' to quit): ").strip()
+        if raw.lower() == "exit":
+            print("Goodbye!")
+            break
+        sequence = parse_sequence(raw)
+        labels = [f"V{i+1}" for i in range(len(sequence))]
 
-    if not result:
-        if out_path:
-            with open(out_path, "w") as f:
-                f.write(f"S2 = {sequence}\nSum = {sum(sequence)} (odd)\nResult: NOT graphical\n")
-            print(f"Saved to {out_path}")
-    else:
-        G = build_graph(sequence, labels)
-        print(f"Edge list: {sorted(G.edges())}")
-        if verify_degrees(G, sequence, labels):
-            plot_graph(G, labels, out_path=out_path)
+        result, step = havel_hakimi(sequence, labels)
+        print(f"\nOutcome: {'Graphical' if result else 'NOT graphical'}")
+
+        if not result:
+            if out_path:
+                with open(out_path, "w") as f:
+                    f.write(f"Sequence = {sequence}\nSum = {sum(sequence)}\nResult: NOT graphical\n")
+                print(f"Saved to {out_path}")
+        else:
+            G = build_graph(sequence, labels)
+            print(f"Edge list: {sorted(G.edges())}")
+            if verify_degrees(G, sequence, labels):
+                plot_graph(G, labels, out_path=out_path)
 
 
 if __name__ == "__main__":
